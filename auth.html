@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DietLift Account</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; margin-bottom: 0.35rem; }
+  .field input {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+  }
+  .field input:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
+  button {
+    font: inherit;
+    font-weight: 500;
+    color: var(--paper);
+    background: var(--pine);
+    border: 0;
+    border-radius: 3px;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+  }
+  button:hover { background: #245540; }
+  button:disabled { background: var(--muted); cursor: default; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .msg { margin-top: 1.25rem; }
+  .msg.bad { color: #8a2b22; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="wordmark" href="index.html">DietLift</a>
+    <nav>
+      <a href="privacy.html">Privacy</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Signup confirmed -->
+  <section id="confirmed" hidden>
+    <h1>Email confirmed</h1>
+    <p class="lede">Your DietLift account is active.</p>
+    <p>Go back to the DietLift app on your iPhone and sign in with the email and password you just used. You can close this page.</p>
+  </section>
+
+  <!-- Password reset form -->
+  <section id="recovery" hidden>
+    <h1>Choose a new password</h1>
+    <p class="lede">Pick a password of at least 8 characters, then sign in again in the app.</p>
+
+    <div class="field">
+      <label for="pw1">New password</label>
+      <input id="pw1" type="password" autocomplete="new-password" minlength="8">
+    </div>
+    <div class="field">
+      <label for="pw2">Repeat new password</label>
+      <input id="pw2" type="password" autocomplete="new-password" minlength="8">
+    </div>
+    <button id="save" type="button">Save new password</button>
+    <p class="msg" id="recoveryMsg" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- Password changed -->
+  <section id="done" hidden>
+    <h1>Password changed</h1>
+    <p class="lede">You can close this page.</p>
+    <p>Open DietLift on your iPhone and sign in with your new password.</p>
+  </section>
+
+  <!-- Expired or broken link -->
+  <section id="expired" hidden>
+    <h1>This link has expired</h1>
+    <p class="lede" id="expiredDetail">Email links are only valid for a short time, and only the most recent one works.</p>
+    <p>Open DietLift, tap “Forgot password?” on the sign-in screen, and request a new link. If you were confirming a new account, request a fresh confirmation email from the same screen.</p>
+    <p>Still stuck? <a href="support.html">Contact support</a>.</p>
+  </section>
+
+  <!-- Landed here directly -->
+  <section id="plain" hidden>
+    <h1>DietLift account</h1>
+    <p class="lede">There's nothing to do on this page.</p>
+    <p>It only does something when you arrive from a confirmation or password-reset email. Open DietLift on your iPhone, or read the <a href="privacy.html">privacy policy</a>.</p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var SUPABASE_URL = "https://mzgxscmwdwlkjqbeobcs.supabase.co";
+  var PUBLISHABLE_KEY = "sb_publishable__IKNVYTpuhiXM6ed2Xfq5A_CkZhBlaA";
+
+  function show(id) {
+    var el = document.getElementById(id);
+    if (el) el.hidden = false;
+  }
+
+  function params() {
+    var out = {};
+    var raw = (window.location.hash || "").replace(/^#/, "");
+    if (!raw) raw = (window.location.search || "").replace(/^\?/, "");
+    raw.split("&").forEach(function (pair) {
+      if (!pair) return;
+      var i = pair.indexOf("=");
+      var k = i < 0 ? pair : pair.slice(0, i);
+      var v = i < 0 ? "" : pair.slice(i + 1);
+      out[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, " "));
+    });
+    return out;
+  }
+
+  var p = params();
+
+  // Never leave tokens sitting in the address bar or browser history.
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+
+  if (p.error || p.error_description) {
+    var detail = document.getElementById("expiredDetail");
+    if (detail && p.error_description) detail.textContent = p.error_description;
+    show("expired");
+    return;
+  }
+
+  var token = p.access_token;
+
+  if (!token) {
+    show("plain");
+    return;
+  }
+
+  if (p.type !== "recovery") {
+    show("confirmed");
+    return;
+  }
+
+  show("recovery");
+
+  var pw1 = document.getElementById("pw1");
+  var pw2 = document.getElementById("pw2");
+  var save = document.getElementById("save");
+  var msg = document.getElementById("recoveryMsg");
+
+  function fail(text) {
+    msg.className = "msg bad";
+    msg.textContent = text;
+  }
+
+  save.addEventListener("click", function () {
+    var a = pw1.value;
+    var b = pw2.value;
+
+    if (a.length < 8) { fail("Use at least 8 characters."); pw1.focus(); return; }
+    if (a !== b) { fail("The two passwords don't match."); pw2.focus(); return; }
+
+    save.disabled = true;
+    msg.className = "msg";
+    msg.textContent = "Saving…";
+
+    fetch(SUPABASE_URL + "/auth/v1/user", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ password: a })
+    })
+    .then(function (res) {
+      if (res.ok) {
+        document.getElementById("recovery").hidden = true;
+        show("done");
+        return;
+      }
+      return res.json().then(function (body) {
+        save.disabled = false;
+        fail(body.msg || body.error_description || body.message || "That didn't work. The link may have expired — request a new one from the app.");
+      }, function () {
+        save.disabled = false;
+        fail("That didn't work. The link may have expired — request a new one from the app.");
+      });
+    })
+    .catch(function () {
+      save.disabled = false;
+      fail("Couldn't reach the server. Check your connection and try again.");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

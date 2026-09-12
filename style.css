@@ -1,0 +1,164 @@
+/* DietLift — shared styles */
+
+:root {
+  --ink:       #1c2b24;
+  --paper:     #f2f4f1;
+  --pine:      #2f6b4f;
+  --muted:     #5c6b63;
+  --rule:      #d3dad4;
+  --panel:     #e8ebe7;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.wrap {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
+
+/* ---- masthead ---- */
+
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 3rem;
+}
+
+.masthead .wrap {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.75rem;
+}
+
+.wordmark {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.masthead nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.masthead nav a { color: var(--muted); }
+.masthead nav a[aria-current="page"] { color: var(--pine); }
+
+/* ---- type ---- */
+
+h1 {
+  font-size: 2.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.75rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2.75rem 0 0.6rem;
+}
+
+h2 .num {
+  color: var(--pine);
+  font-weight: 400;
+  margin-right: 0.5rem;
+}
+
+p, li { margin: 0 0 1rem; }
+
+a { color: var(--pine); }
+a:hover { text-decoration-thickness: 2px; }
+
+a:focus-visible,
+.readout:focus-visible {
+  outline: 2px solid var(--pine);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+ul { padding-left: 1.15rem; }
+li::marker { color: var(--muted); }
+
+.lede {
+  font-size: 1.15rem;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+}
+
+.stamp {
+  font-size: 0.9rem;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+  margin-top: 3.5rem;
+}
+
+.note {
+  background: var(--panel);
+  border-left: 3px solid var(--pine);
+  padding: 1rem 1.25rem;
+  margin: 2rem 0;
+}
+
+.note p:last-child { margin-bottom: 0; }
+
+/* ---- the readout (home page only) ---- */
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.75rem;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 1rem;
+  margin: 0 0 2.5rem;
+}
+
+.readout div { min-width: 4.5rem; }
+
+.readout .figure {
+  display: block;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.readout .unit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.readout .label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 30rem) {
+  .readout { gap: 1.25rem 2rem; }
+  .readout .figure { font-size: 1.6rem; }
+  h1 { font-size: 1.7rem; }
+}
